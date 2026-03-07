@@ -37,7 +37,6 @@ namespace JASON_Compiler
             program.Children.Add(Header());
             program.Children.Add(DeclSec());
             program.Children.Add(Block());
-            program.Children.Add(match(Token_Class.Dot));
             MessageBox.Show("Success");
             return program;
         }

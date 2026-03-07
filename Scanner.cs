@@ -6,12 +6,26 @@ using System.Text;
 using System.Threading.Tasks;
 
 public enum Token_Class
-{
-    Begin, Call, Declare, End, Do, Else, EndIf, EndUntil, EndWhile, If, Integer,
-    Parameters, Procedure, Program, Read, Real, Set, Then, Until, While, Write,
-    Dot, Semicolon, Comma, LParanthesis, RParanthesis, EqualOp, LessThanOp,
-    GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,
-    Idenifier, Constant
+{// Keywords
+    Int, Float, String,
+    Read, Write,
+    Repeat, Until,
+    If, ElseIf, Else, Then,
+    Return, Endl,
+    // Operators
+    PlusOp, MinusOp, MultiplyOp, DivideOp,
+    AssignOp,
+    LessThanOp, GreaterThanOp, EqualOp, NotEqualOp,
+    AndOp, OrOp,
+    // Symbols
+    LParanthesis, RParanthesis,
+    LBrace, RBrace,
+    Semicolon, Comma,
+    // Literals
+    Idenifier,
+    Number,
+    StringValue,
+    Constant
 }
 namespace JASON_Compiler
 {
@@ -31,43 +45,37 @@ namespace JASON_Compiler
 
         public Scanner()
         {
-            ReservedWords.Add("if", Token_Class.If);
-            ReservedWords.Add("begin", Token_Class.Begin);
-            ReservedWords.Add("call", Token_Class.Call);
-            ReservedWords.Add("declare", Token_Class.Declare);
-            ReservedWords.Add("end", Token_Class.End);
-            ReservedWords.Add("do", Token_Class.Do);
-            ReservedWords.Add("else", Token_Class.Else);
-            ReservedWords.Add("endif", Token_Class.EndIf);
-            ReservedWords.Add("enduntil", Token_Class.EndUntil);
-            ReservedWords.Add("endwhile", Token_Class.EndWhile);
-            ReservedWords.Add("integer", Token_Class.Integer);
-            ReservedWords.Add("parameters", Token_Class.Parameters);
-            ReservedWords.Add("procedure", Token_Class.Procedure);
-            ReservedWords.Add("program", Token_Class.Program);
+            ReservedWords.Add("int", Token_Class.Int);
+            ReservedWords.Add("float", Token_Class.Float);
+            ReservedWords.Add("string", Token_Class.String);
             ReservedWords.Add("read", Token_Class.Read);
-            ReservedWords.Add("real", Token_Class.Real);
-            ReservedWords.Add("set", Token_Class.Set);
-            ReservedWords.Add("then", Token_Class.Then);
-            ReservedWords.Add("until", Token_Class.Until);
-            ReservedWords.Add("while", Token_Class.While);
             ReservedWords.Add("write", Token_Class.Write);
+            ReservedWords.Add("repeat", Token_Class.Repeat);
+            ReservedWords.Add("until", Token_Class.Until);
+            ReservedWords.Add("if", Token_Class.If);
+            ReservedWords.Add("elseif", Token_Class.ElseIf);
+            ReservedWords.Add("else", Token_Class.Else);
+            ReservedWords.Add("then", Token_Class.Then);
+            ReservedWords.Add("return", Token_Class.Return);
+            ReservedWords.Add("endl", Token_Class.Endl);
 
-            Operators.Add(".", Token_Class.Dot);
-            Operators.Add(";", Token_Class.Semicolon);
-            Operators.Add(",", Token_Class.Comma);
-            Operators.Add("(", Token_Class.LParanthesis);
-            Operators.Add(")", Token_Class.RParanthesis);
-            Operators.Add("=", Token_Class.EqualOp);
-            Operators.Add("<",Token_Class.LessThanOp);
-            Operators.Add(">", Token_Class.GreaterThanOp);
-            Operators.Add("!", Token_Class.NotEqualOp);
             Operators.Add("+", Token_Class.PlusOp);
             Operators.Add("-", Token_Class.MinusOp);
             Operators.Add("*", Token_Class.MultiplyOp);
             Operators.Add("/", Token_Class.DivideOp);
-            
-
+            Operators.Add(":=", Token_Class.AssignOp);
+            Operators.Add("<", Token_Class.LessThanOp);
+            Operators.Add(">", Token_Class.GreaterThanOp);
+            Operators.Add("=", Token_Class.EqualOp);
+            Operators.Add("<>", Token_Class.NotEqualOp);
+            Operators.Add("&&", Token_Class.AndOp);
+            Operators.Add("||", Token_Class.OrOp);
+            Operators.Add("(", Token_Class.LParanthesis);
+            Operators.Add(")", Token_Class.RParanthesis);
+            Operators.Add("{", Token_Class.LBrace);
+            Operators.Add("}", Token_Class.RBrace);
+            Operators.Add(";", Token_Class.Semicolon);
+            Operators.Add(",", Token_Class.Comma);
 
         }
 
@@ -78,7 +86,7 @@ namespace JASON_Compiler
                 int j = i;
                 char CurrentChar = SourceCode[i];
                 string CurrentLexeme = CurrentChar.ToString();
-
+                //ignore whitespaces
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
                     continue;
 
@@ -122,7 +130,7 @@ namespace JASON_Compiler
                     FindTokenClass(CurrentLexeme);
                     i = j-1;
                 }
-               
+               //ignore comments
                 else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
                     j = i + 2;
