@@ -122,16 +122,18 @@ namespace JASON_Compiler
                     FindTokenClass(CurrentLexeme);
                     i = j-1;
                 }
-                else if(CurrentChar == '{')
+               
+                else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
-                    j++;
-                    CurrentChar = SourceCode[j];
-                    while(CurrentChar != '}')
+                    j = i + 2;
+
+                    while (j < SourceCode.Length - 1 &&
+                          !(SourceCode[j] == '*' && SourceCode[j + 1] == '/'))
                     {
                         j++;
-                        CurrentChar = SourceCode[j];
                     }
-                    i = j;
+
+                    i = j + 1;
                 }
                 else
                 {
