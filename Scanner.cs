@@ -190,14 +190,14 @@ namespace JASON_Compiler
         bool isIdentifier(string lex)
         {
             bool isValid=true;
-            Regex regex = new Regex(@"[A-Za-z][A-Za-z0-9]*", RegexOptions.Compiled);
+            Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9]*$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
         bool isConstant(string lex)
         {
             bool isValid = true;
-            Regex regex= new Regex(@"[0-9]+(\.[0-9]+)?", RegexOptions.Compiled);
+            Regex regex= new Regex(@"^[0-9]+(\.[0-9]+)?$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
