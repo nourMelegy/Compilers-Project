@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -189,33 +190,15 @@ namespace JASON_Compiler
         bool isIdentifier(string lex)
         {
             bool isValid=true;
-            if (!(lex[0] >= 'A' && lex[0] <= 'z'))
-            { isValid = false; }
-
-            else
-            {
-                for (int i = 1; i < lex.Length; i++)
-                {
-                    if(!(lex[i] >= 'A' && lex[i] <= 'z')
-                        || (lex[i] >= '0' && lex[i] <= '9'))
-                    {
-                        isValid = false;
-                    }
-                }
-            }
+            Regex regex = new Regex(@"[A-Za-z][A-Za-z0-9]*", RegexOptions.Compiled);
+            isValid = regex.IsMatch(lex);
             return isValid;
         }
         bool isConstant(string lex)
         {
             bool isValid = true;
-          
-                for (int i = 0; i < lex.Length; i++)
-                {
-                    if (!((lex[i] >= '0' && lex[i] <= '9') || lex[i]=='.'))
-                    {
-                        isValid = false;
-                    }
-                }
+            Regex regex= new Regex(@"[0-9]+(\.[0-9]+)?", RegexOptions.Compiled);
+            isValid = regex.IsMatch(lex);
             return isValid;
         }
     }
