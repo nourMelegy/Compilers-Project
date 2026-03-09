@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -19,7 +19,7 @@ public enum Token_Class
     AndOp, OrOp,
     // Symbols
     LParanthesis, RParanthesis,
-    LBrace, RBrace,
+    LCurly, RCurly,
     Semicolon, Comma,
     // Literals
     Idenifier,
@@ -89,7 +89,19 @@ namespace JASON_Compiler
                 //ignore whitespaces
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
                     continue;
+                //Nour 
+                //hena handling two character operators
+                if (i + 1 < SourceCode.Length)
+                {
+                    string twoChar = SourceCode.Substring(i, 2);
 
+                    if (Operators.ContainsKey(twoChar))
+                    {
+                        FindTokenClass(twoChar);
+                        i++;
+                        continue;
+                    }
+                }
                 if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
                 {
                    j = i + 1;
@@ -214,4 +226,3 @@ namespace JASON_Compiler
     }
 }
 // ttt
-
