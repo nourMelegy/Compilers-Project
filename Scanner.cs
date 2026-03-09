@@ -72,8 +72,8 @@ namespace JASON_Compiler
             Operators.Add("||", Token_Class.OrOp);
             Operators.Add("(", Token_Class.LParanthesis);
             Operators.Add(")", Token_Class.RParanthesis);
-            Operators.Add("{", Token_Class.LBrace);
-            Operators.Add("}", Token_Class.RBrace);
+            Operators.Add("{", Token_Class.LCurly);
+            Operators.Add("}", Token_Class.RCurly);
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
 
@@ -214,3 +214,4 @@ namespace JASON_Compiler
     }
 }
 // ttt
+
