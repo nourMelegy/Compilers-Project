@@ -102,6 +102,24 @@ namespace JASON_Compiler
                         continue;
                     }
                 }
+                //"" handling
+                 else if (CurrentChar == '"') {
+     j = i + 1;
+     CurrentLexeme = "\"";
+
+     while (j < SourceCode.Length && SourceCode[j] != '"')
+     {
+         CurrentLexeme += SourceCode[j];
+         j++;
+     }
+
+     if (j < SourceCode.Length)
+         CurrentLexeme += "\"";
+
+     FindTokenClass(CurrentLexeme);
+     i = j;
+ }
+                
                 if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
                 {
                    j = i + 1;
@@ -175,6 +193,12 @@ namespace JASON_Compiler
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
+            //handling strings 
+             else if (Lex.StartsWith("\"") && Lex.EndsWith("\""))
+ {
+     Tok.token_type = Token_Class.StringValue;
+     Tokens.Add(Tok);
+ }
             //Is it an identifier?
             else if(isIdentifier(Lex))
             {
