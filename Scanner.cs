@@ -11,7 +11,7 @@ public enum Token_Class
     Parameters, Procedure, Program, Read, Real, Set, Then, Until, While, Write,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, EqualOp, LessThanOp,
     GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,
-    Idenifier, Constant
+    Idenifier, Constant, StringLiteral
 }
 namespace JASON_Compiler
 {
@@ -133,6 +133,24 @@ namespace JASON_Compiler
                     }
                     i = j;
                 }
+                else if (CurrentChar == '"' || CurrentChar == '\'')
+                {
+                    char quoteType = CurrentChar;
+                    j = i + 1;
+
+                    while (j < SourceCode.Length && SourceCode[j] != quoteType)
+                    {
+                        CurrentLexeme += SourceCode[j];
+                        j++;
+                    }
+
+                    if (j < SourceCode.Length)
+                        CurrentLexeme += quoteType;
+
+                    FindTokenClass(CurrentLexeme);
+
+                    i = j;
+                }
                 else
                 {
                     FindTokenClass(CurrentLexeme);
@@ -175,6 +193,13 @@ namespace JASON_Compiler
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
+            //Is it a String Literal?
+            else if (isStringLiteral(Lex))
+            {
+                TC = Token_Class.StringLiteral;
+                Tok.token_type = TC;
+                Tokens.Add(Tok);
+            }
             //Is it an operator?
 
             else
@@ -201,6 +226,14 @@ namespace JASON_Compiler
             isValid = regex.IsMatch(lex);
             return isValid;
         }
+        bool isStringLiteral(string lex)
+        {
+            bool isValid = true;
+            Regex regex = new Regex(@"^(""[^""]*""|'[^']*')$", RegexOptions.Compiled);
+            isValid = regex.IsMatch(lex);
+            return isValid;
+        }
     }
 }
 // ttt
+//f
