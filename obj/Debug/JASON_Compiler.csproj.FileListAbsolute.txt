@@ -1,0 +1,10 @@
+C:\compiler project\bin\Debug\JASON_Compiler.exe
+C:\compiler project\bin\Debug\JASON_Compiler.pdb
+C:\compiler project\obj\Debug\JASON_Compiler.csproj.AssemblyReference.cache
+C:\compiler project\obj\Debug\JASON_Compiler.Form1.resources
+C:\compiler project\obj\Debug\JASON_Compiler.Form2.resources
+C:\compiler project\obj\Debug\JASON_Compiler.Properties.Resources.resources
+C:\compiler project\obj\Debug\JASON_Compiler.csproj.GenerateResource.cache
+C:\compiler project\obj\Debug\JASON_Compiler.csproj.CoreCompileInputs.cache
+C:\compiler project\obj\Debug\JASON_Compiler.exe
+C:\compiler project\obj\Debug\JASON_Compiler.pdb

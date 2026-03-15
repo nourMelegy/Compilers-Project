@@ -6,12 +6,29 @@ using System.Text;
 using System.Threading.Tasks;
 
 public enum Token_Class
-{
-    Begin, Call, Declare, End, Do, Else, EndIf, EndUntil, EndWhile, If, Integer,
-    Parameters, Procedure, Program, Read, Real, Set, Then, Until, While, Write,
-    Dot, Semicolon, Comma, LParanthesis, RParanthesis, EqualOp, LessThanOp,
-    GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,
-    Idenifier, Constant
+
+{// Keywords
+    Int, Float, String,
+    Read, Write,
+    Repeat, Until,
+    If, ElseIf, Else, Then,
+    Return, Endl,
+    // Operators
+    PlusOp, MinusOp, MultiplyOp, DivideOp,
+    AssignOp,
+    LessThanOp, GreaterThanOp, EqualOp, NotEqualOp,
+    AndOp, OrOp,
+    // Symbols
+    LParanthesis, RParanthesis,
+    LCurly, RCurly,
+    Semicolon, Comma,
+    // Literals
+    Idenifier,
+    Number,
+    StringValue,
+    Constant,
+    StringLiteral
+
 }
 namespace JASON_Compiler
 {
@@ -88,23 +105,7 @@ namespace JASON_Compiler
                         continue;
                     }
                 }
-                //"" handling
-                 else if (CurrentChar == '"') {
-     j = i + 1;
-     CurrentLexeme = "\"";
 
-     while (j < SourceCode.Length && SourceCode[j] != '"')
-     {
-         CurrentLexeme += SourceCode[j];
-         j++;
-     }
-
-     if (j < SourceCode.Length)
-         CurrentLexeme += "\"";
-
-     FindTokenClass(CurrentLexeme);
-     i = j;
- }
                 
                 if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
                 {
@@ -197,12 +198,7 @@ namespace JASON_Compiler
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-            //handling strings 
-             else if (Lex.StartsWith("\"") && Lex.EndsWith("\""))
- {
-     Tok.token_type = Token_Class.StringValue;
-     Tokens.Add(Tok);
- }
+           
             //Is it an identifier?
             else if(isIdentifier(Lex))
             {
@@ -269,3 +265,4 @@ namespace JASON_Compiler
 }
 // ttt
 //f
+//.
