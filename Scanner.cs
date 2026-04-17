@@ -183,20 +183,30 @@ namespace JASON_Compiler
                     i = j + 1;
                 }
 
-                else if (CurrentChar == '"')
-                {
-                    j = i + 1;
-                    while (j < SourceCode.Length && SourceCode[j] != '"')
-                    {
-                        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
-                            j++;
-                        j++;
-                    }
-                    j++;
-                    CurrentLexeme = SourceCode.Substring(i, j - i);
-                    FindTokenClass(CurrentLexeme);
-                    i = j - 1;
-                }
+               
+else if (CurrentChar == '"')
+{
+    j = i + 1;
+    while (j < SourceCode.Length && SourceCode[j] != '"')
+    {
+        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
+            j++;
+        j++;
+    }
+    
+    if (j >= SourceCode.Length)
+    {
+        Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
+        i = SourceCode.Length - 1;
+    }
+    else
+    {
+        j++;
+        CurrentLexeme = SourceCode.Substring(i, j - i);
+        FindTokenClass(CurrentLexeme);
+        i = j - 1;
+    }
+}
 
                 else
                 {
