@@ -80,6 +80,7 @@ namespace JASON_Compiler
             Operators.Add("}", Token_Class.RCurly);
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
+            Operators.Add(".", Token_Class.Dot);
 
         }
 
