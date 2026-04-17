@@ -14,10 +14,10 @@ public enum Token_Class
     If, ElseIf, Else, Then,
     Return, Endl,
     // Operators
-    PlusOp, MinusOp, MultiplyOp, DivideOp,
-    AssignOp,
-    LessThanOp, GreaterThanOp, EqualOp, NotEqualOp,
-    AndOp, OrOp,
+    Plus, Minus, Multiply, Divide,
+    Assign,
+    LessT, GreaterT, Equal, NotEqual,
+    And, Or,
     // Symbols
     LParanthesis, RParanthesis,
     LCurly, RCurly,
@@ -28,7 +28,7 @@ public enum Token_Class
     StringValue,
     Constant,
     StringLiteral
-        ,Dot
+        , Dot
 
 }
 namespace JASON_Compiler
@@ -63,17 +63,17 @@ namespace JASON_Compiler
             ReservedWords.Add("return", Token_Class.Return);
             ReservedWords.Add("endl", Token_Class.Endl);
 
-            Operators.Add("+", Token_Class.PlusOp);
-            Operators.Add("-", Token_Class.MinusOp);
-            Operators.Add("*", Token_Class.MultiplyOp);
-            Operators.Add("/", Token_Class.DivideOp);
-            Operators.Add(":=", Token_Class.AssignOp);
-            Operators.Add("<", Token_Class.LessThanOp);
-            Operators.Add(">", Token_Class.GreaterThanOp);
-            Operators.Add("=", Token_Class.EqualOp);
-            Operators.Add("<>", Token_Class.NotEqualOp);
-            Operators.Add("&&", Token_Class.AndOp);
-            Operators.Add("||", Token_Class.OrOp);
+            Operators.Add("+", Token_Class.Plus);
+            Operators.Add("-", Token_Class.Minus);
+            Operators.Add("*", Token_Class.Multiply);
+            Operators.Add("/", Token_Class.Divide);
+            Operators.Add(":=", Token_Class.Assign);
+            Operators.Add("<", Token_Class.LessT);
+            Operators.Add(">", Token_Class.GreaterT);
+            Operators.Add("=", Token_Class.Equal);
+            Operators.Add("<>", Token_Class.NotEqual);
+            Operators.Add("&&", Token_Class.And);
+            Operators.Add("||", Token_Class.Or);
             Operators.Add("(", Token_Class.LParanthesis);
             Operators.Add(")", Token_Class.RParanthesis);
             Operators.Add("{", Token_Class.LCurly);
@@ -125,7 +125,7 @@ namespace JASON_Compiler
                         }
                     }
                     FindTokenClass(CurrentLexeme);
-                    i = j - 1; 
+                    i = j - 1;
                 }
 
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
@@ -183,30 +183,20 @@ namespace JASON_Compiler
                     i = j + 1;
                 }
 
-               
-else if (CurrentChar == '"')
-{
-    j = i + 1;
-    while (j < SourceCode.Length && SourceCode[j] != '"')
-    {
-        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
-            j++;
-        j++;
-    }
-    
-    if (j >= SourceCode.Length)
-    {
-        Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
-        i = SourceCode.Length - 1;
-    }
-    else
-    {
-        j++;
-        CurrentLexeme = SourceCode.Substring(i, j - i);
-        FindTokenClass(CurrentLexeme);
-        i = j - 1;
-    }
-}
+                else if (CurrentChar == '"')
+                {
+                    j = i + 1;
+                    while (j < SourceCode.Length && SourceCode[j] != '"')
+                    {
+                        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
+                            j++;
+                        j++;
+                    }
+                    j++;
+                    CurrentLexeme = SourceCode.Substring(i, j - i);
+                    FindTokenClass(CurrentLexeme);
+                    i = j - 1;
+                }
 
                 else
                 {
@@ -311,7 +301,7 @@ else if (CurrentChar == '"')
         bool isStringLiteral(string lex)
         {
             bool isValid = true;
-           Regex regex = new Regex(@"^""([^""\\]|\\.)*""$", RegexOptions.Compiled);
+            Regex regex = new Regex(@"^""([^""\\]|\\.)*""$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
