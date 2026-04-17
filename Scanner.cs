@@ -28,16 +28,17 @@ public enum Token_Class
     StringValue,
     Constant,
     StringLiteral
+        ,Dot
 
 }
 namespace JASON_Compiler
 {
-    
+
 
     public class Token
     {
-       public string lex;
-       public Token_Class token_type;
+        public string lex;
+        public Token_Class token_type;
     }
 
     public class Scanner
@@ -82,9 +83,9 @@ namespace JASON_Compiler
 
         }
 
-    public void StartScanning(string SourceCode)
+        public void StartScanning(string SourceCode)
         {
-            for(int i=0; i<SourceCode.Length;i++)
+            for (int i = 0; i < SourceCode.Length; i++)
             {
                 int j = i;
                 char CurrentChar = SourceCode[i];
@@ -96,7 +97,7 @@ namespace JASON_Compiler
                 //hena handling two character operators
                 if (i + 1 < SourceCode.Length)
                 {
-                    string twoChar = SourceCode.Substring(i, 2);
+                    string twoChar = "" + SourceCode[i] + SourceCode[i + 1];
 
                     if (Operators.ContainsKey(twoChar))
                     {
@@ -106,10 +107,9 @@ namespace JASON_Compiler
                     }
                 }
 
-                
                 if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
                 {
-                   j = i + 1;
+                    j = i + 1;
                     if (j < SourceCode.Length)
                     {
                         CurrentChar = SourceCode[j];
@@ -126,10 +126,10 @@ namespace JASON_Compiler
                     }
                     FindTokenClass(CurrentLexeme);
 
-                    i = j-1;
+                    i = j - 1;
                 }
 
-                else if(CurrentChar >= '0' && CurrentChar <= '9')
+                else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
                     j = i + 1;
                     //CurrentLexeme = CurrentLexeme + CurrentChar.ToString();
@@ -140,14 +140,14 @@ namespace JASON_Compiler
                         CurrentLexeme = CurrentLexeme + CurrentChar.ToString();
 
                         j++;
-                       if (j<SourceCode.Length)
-                        CurrentChar = SourceCode[j];
-                       
+                        if (j < SourceCode.Length)
+                            CurrentChar = SourceCode[j];
+
                     }
                     FindTokenClass(CurrentLexeme);
-                    i = j-1;
+                    i = j - 1;
                 }
-               //ignore comments
+                //ignore comments
                 else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
                     j = i + 2;
@@ -183,7 +183,7 @@ namespace JASON_Compiler
                     FindTokenClass(CurrentLexeme);
                 }
             }
-            
+
             JASON_Compiler.TokenStream = Tokens;
         }
         void FindTokenClass(string Lex)
@@ -198,9 +198,9 @@ namespace JASON_Compiler
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-           
+
             //Is it an identifier?
-            else if(isIdentifier(Lex))
+            else if (isIdentifier(Lex))
             {
                 TC = Token_Class.Idenifier;
                 Tok.token_type = TC;
@@ -215,7 +215,7 @@ namespace JASON_Compiler
             }
 
             //Is it a Constant?
-            else if(isConstant(Lex))
+            else if (isConstant(Lex))
             {
                 TC = Token_Class.Constant;
                 Tok.token_type = TC;
@@ -232,17 +232,17 @@ namespace JASON_Compiler
 
             else
             {
-                Errors.Error_List.Add("Unidentified Token "+ Lex );
+                Errors.Error_List.Add("Unidentified Token " + Lex);
             }
 
 
         }
 
-    
+
 
         bool isIdentifier(string lex)
         {
-            bool isValid=true;
+            bool isValid = true;
             Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9]*$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
@@ -250,7 +250,7 @@ namespace JASON_Compiler
         bool isConstant(string lex)
         {
             bool isValid = true;
-            Regex regex= new Regex(@"^[0-9]+(\.[0-9]+)?$", RegexOptions.Compiled);
+            Regex regex = new Regex(@"^[0-9]+(\.[0-9]+)?$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
