@@ -107,46 +107,53 @@ namespace JASON_Compiler
                     }
                 }
 
-                if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
+            if ((CurrentChar >= 'A' && CurrentChar <= 'Z') || 
+            (CurrentChar >= 'a' && CurrentChar <= 'z') || 
+            CurrentChar == '_')
+        {
+            j = i + 1;
+            if (j < SourceCode.Length)
+            {
+                CurrentChar = SourceCode[j];
+                while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                       (CurrentChar >= 'a' && CurrentChar <= 'z') ||
+                       (CurrentChar >= '0' && CurrentChar <= '9') ||
+                       CurrentChar == '_')
                 {
-                    j = i + 1;
+                    CurrentLexeme += CurrentChar.ToString();
+                    j++;
                     if (j < SourceCode.Length)
-                    {
                         CurrentChar = SourceCode[j];
-
-                        while ((CurrentChar >= 'A' && CurrentChar <= 'z') || CurrentChar >= '0' && CurrentChar <= '9')
-                        {
-
-                            CurrentLexeme = CurrentLexeme + CurrentChar.ToString();
-
-                            j++;
-                            CurrentChar = SourceCode[j];
-
-                        }
-                    }
-                    FindTokenClass(CurrentLexeme);
-
-                    i = j - 1;
+                    else break;
                 }
+            }
+            FindTokenClass(CurrentLexeme);
+            i = j - 1;
+        }
 
-                else if (CurrentChar >= '0' && CurrentChar <= '9')
-                {
-                    j = i + 1;
-                    //CurrentLexeme = CurrentLexeme + CurrentChar.ToString();
-                    CurrentChar = SourceCode[j];
+         else if (CurrentChar >= '0' && CurrentChar <= '9')
+{
+    j = i + 1;
+    bool hasDot = false; 
 
-                    while ((CurrentChar >= '0' && CurrentChar <= '9') || CurrentChar.Equals('.'))
-                    {
-                        CurrentLexeme = CurrentLexeme + CurrentChar.ToString();
-
-                        j++;
-                        if (j < SourceCode.Length)
-                            CurrentChar = SourceCode[j];
-
-                    }
-                    FindTokenClass(CurrentLexeme);
-                    i = j - 1;
-                }
+    if (j < SourceCode.Length)
+    {
+        CurrentChar = SourceCode[j];
+        while (j < SourceCode.Length &&
+              ((CurrentChar >= '0' && CurrentChar <= '9') || 
+               (CurrentChar == '.' && !hasDot))) 
+        {
+            if (CurrentChar == '.') hasDot = true;
+            CurrentLexeme += CurrentChar;
+            j++;
+            if (j < SourceCode.Length)
+                CurrentChar = SourceCode[j];
+            else break;
+        }
+    }
+    FindTokenClass(CurrentLexeme);
+    i = j - 1;
+}
                 //ignore comments
                 else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
@@ -160,23 +167,19 @@ namespace JASON_Compiler
 
                     i = j + 1;
                 }
-                else if (CurrentChar == '"' || CurrentChar == '\'')
+                else if (CurrentChar == '"')
                 {
-                    char quoteType = CurrentChar;
                     j = i + 1;
-
-                    while (j < SourceCode.Length && SourceCode[j] != quoteType)
-                    {
-                        CurrentLexeme += SourceCode[j];
+                    while (j < SourceCode.Length && SourceCode[j] != '"')
+                   {
+                       if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
+                      j++; // skip escaped char
                         j++;
-                    }
-
-                    if (j < SourceCode.Length)
-                        CurrentLexeme += quoteType;
-
-                    FindTokenClass(CurrentLexeme);
-
-                    i = j;
+                   }
+                   j++; 
+                  CurrentLexeme = SourceCode.Substring(i, j - i);
+                  FindTokenClass(CurrentLexeme);
+                  i = j - 1;
                 }
                 else
                 {
@@ -243,7 +246,7 @@ namespace JASON_Compiler
         bool isIdentifier(string lex)
         {
             bool isValid = true;
-            Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9]*$", RegexOptions.Compiled);
+            Regex regex = new Regex(@"^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
@@ -257,7 +260,7 @@ namespace JASON_Compiler
         bool isStringLiteral(string lex)
         {
             bool isValid = true;
-            Regex regex = new Regex(@"^(""[^""]*""|'[^']*')$", RegexOptions.Compiled);
+           Regex regex = new Regex(@"^""([^""\\]|\\.)*""$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
