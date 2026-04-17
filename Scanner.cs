@@ -130,30 +130,51 @@ namespace JASON_Compiler
             FindTokenClass(CurrentLexeme);
             i = j - 1;
         }
+                else if (CurrentChar >= '0' && CurrentChar <= '9')
+                {
+                    j = i + 1;
+                    bool hasDot = false;
 
-         else if (CurrentChar >= '0' && CurrentChar <= '9')
-{
-    j = i + 1;
-    bool hasDot = false; 
+                    if (j < SourceCode.Length)
+                    {
+                        CurrentChar = SourceCode[j];
+                        while (j < SourceCode.Length &&
+                              ((CurrentChar >= '0' && CurrentChar <= '9') ||
+                               (CurrentChar == '.' && !hasDot)))
+                        {
+                            if (CurrentChar == '.') hasDot = true;
+                            CurrentLexeme += CurrentChar;
+                            j++;
+                            if (j < SourceCode.Length)
+                                CurrentChar = SourceCode[j];
+                            else break;
+                        }
+                    }
 
-    if (j < SourceCode.Length)
-    {
-        CurrentChar = SourceCode[j];
-        while (j < SourceCode.Length &&
-              ((CurrentChar >= '0' && CurrentChar <= '9') || 
-               (CurrentChar == '.' && !hasDot))) 
-        {
-            if (CurrentChar == '.') hasDot = true;
-            CurrentLexeme += CurrentChar;
-            j++;
-            if (j < SourceCode.Length)
-                CurrentChar = SourceCode[j];
-            else break;
-        }
-    }
-    FindTokenClass(CurrentLexeme);
-    i = j - 1;
-}
+                   
+                    if (j < SourceCode.Length && SourceCode[j] == '.')
+                    {
+                        while (j < SourceCode.Length &&
+                              (SourceCode[j] == '.' || (SourceCode[j] >= '0' && SourceCode[j] <= '9')))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else if (hasDot && (CurrentLexeme.EndsWith(".")))
+                    {
+                        Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                        i = j - 1;
+                    }
+                }
+
                 //ignore comments
                 else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
