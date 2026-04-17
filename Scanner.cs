@@ -91,15 +91,13 @@ namespace JASON_Compiler
                 int j = i;
                 char CurrentChar = SourceCode[i];
                 string CurrentLexeme = CurrentChar.ToString();
-                //ignore whitespaces
+
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
                     continue;
-                //Nour 
-                //hena handling two character operators
+
                 if (i + 1 < SourceCode.Length)
                 {
                     string twoChar = "" + SourceCode[i] + SourceCode[i + 1];
-
                     if (Operators.ContainsKey(twoChar))
                     {
                         FindTokenClass(twoChar);
@@ -108,29 +106,28 @@ namespace JASON_Compiler
                     }
                 }
 
-            if ((CurrentChar >= 'A' && CurrentChar <= 'Z') || 
-            (CurrentChar >= 'a' && CurrentChar <= 'z') || 
-            CurrentChar == '_')
-        {
-            j = i + 1;
-            if (j < SourceCode.Length)
-            {
-                CurrentChar = SourceCode[j];
-                while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
-                       (CurrentChar >= 'a' && CurrentChar <= 'z') ||
-                       (CurrentChar >= '0' && CurrentChar <= '9') ||
-                       CurrentChar == '_')
+                if ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                    (CurrentChar >= 'a' && CurrentChar <= 'z'))
                 {
-                    CurrentLexeme += CurrentChar.ToString();
-                    j++;
+                    j = i + 1;
                     if (j < SourceCode.Length)
+                    {
                         CurrentChar = SourceCode[j];
-                    else break;
+                        while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                               (CurrentChar >= 'a' && CurrentChar <= 'z') ||
+                               (CurrentChar >= '0' && CurrentChar <= '9'))
+                        {
+                            CurrentLexeme += CurrentChar.ToString();
+                            j++;
+                            if (j < SourceCode.Length)
+                                CurrentChar = SourceCode[j];
+                            else break;
+                        }
+                    }
+                    FindTokenClass(CurrentLexeme);
+                    i = j - 1; 
                 }
-            }
-            FindTokenClass(CurrentLexeme);
-            i = j - 1;
-        }
+
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
                     j = i + 1;
@@ -152,7 +149,6 @@ namespace JASON_Compiler
                         }
                     }
 
-                   
                     if (j < SourceCode.Length && SourceCode[j] == '.')
                     {
                         while (j < SourceCode.Length &&
@@ -164,7 +160,7 @@ namespace JASON_Compiler
                         Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
                         i = j - 1;
                     }
-                    else if (hasDot && (CurrentLexeme.EndsWith(".")))
+                    else if (hasDot && CurrentLexeme.EndsWith("."))
                     {
                         Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
                         i = j - 1;
@@ -176,36 +172,59 @@ namespace JASON_Compiler
                     }
                 }
 
-                //ignore comments
                 else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
                     j = i + 2;
-
                     while (j < SourceCode.Length - 1 &&
                           !(SourceCode[j] == '*' && SourceCode[j + 1] == '/'))
                     {
                         j++;
                     }
-
                     i = j + 1;
                 }
+
                 else if (CurrentChar == '"')
                 {
                     j = i + 1;
                     while (j < SourceCode.Length && SourceCode[j] != '"')
-                   {
-                       if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
-                      j++; // skip escaped char
+                    {
+                        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length)
+                            j++;
                         j++;
-                   }
-                   j++; 
-                  CurrentLexeme = SourceCode.Substring(i, j - i);
-                  FindTokenClass(CurrentLexeme);
-                  i = j - 1;
+                    }
+                    j++;
+                    CurrentLexeme = SourceCode.Substring(i, j - i);
+                    FindTokenClass(CurrentLexeme);
+                    i = j - 1;
                 }
+
                 else
                 {
-                    FindTokenClass(CurrentLexeme);
+                    if (CurrentChar == '_')
+                    {
+                        j = i + 1;
+                        if (j < SourceCode.Length)
+                        {
+                            CurrentChar = SourceCode[j];
+                            while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                                   (CurrentChar >= 'a' && CurrentChar <= 'z') ||
+                                   (CurrentChar >= '0' && CurrentChar <= '9') ||
+                                   CurrentChar == '_')
+                            {
+                                CurrentLexeme += CurrentChar.ToString();
+                                j++;
+                                if (j < SourceCode.Length)
+                                    CurrentChar = SourceCode[j];
+                                else break;
+                            }
+                        }
+                        Errors.Error_List.Add("Invalid identifier: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                    }
                 }
             }
 
