@@ -306,7 +306,7 @@ namespace JASON_Compiler
         bool isIdentifier(string lex)
         {
             bool isValid = true;
-            Regex regex = new Regex(@"^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
+            Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]$|^[A-Za-z]$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
         }
