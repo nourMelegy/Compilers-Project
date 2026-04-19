@@ -183,28 +183,41 @@ namespace JASON_Compiler
                     i = j + 1;
                 }
 
-                 else if (CurrentChar == '"')
- {
-     j = i + 1;
-     while (j < SourceCode.Length && SourceCode[j] != '"')
-     {
-         if (SourceCode[j] == '\n' || SourceCode[j] == '\r')
-         {
-             Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i, j - i));
-             i = j - 1;
-             goto continueOuter;
-         }
-         if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length &&
-            (SourceCode[j + 1] == '"' || SourceCode[j + 1] == '\\'))
-             j++;
-         j++;
-     }
+else if (CurrentChar == '"')
+{
+    j = i + 1;
+    while (j < SourceCode.Length && SourceCode[j] != '"')
+    {
+        if (SourceCode[j] == '\n' || SourceCode[j] == '\r')
+        {
+            Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i, j - i));
+            i = j - 1;
+            goto continueOuter; // skips FindTokenClass entirely
+        }
+        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length &&
+           (SourceCode[j + 1] == '"' || SourceCode[j + 1] == '\\'))
+            j++;
+        j++;
+    }
 
-     if (j >= SourceCode.Length)
-     {
-         Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
-         i = SourceCode.Length - 1;
-     }
+    if (j >= SourceCode.Length) // reached end without closing "
+    {
+        Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
+        i = SourceCode.Length - 1;
+        goto continueOuter; // ← ADD THIS, was missing before!
+    }
+    else
+    {
+        j++;
+        CurrentLexeme = SourceCode.Substring(i, j - i);
+        FindTokenClass(CurrentLexeme);
+        CurrentLexeme = CurrentLexeme.Replace("\\\\", "\\")
+                                     .Replace("\\\"", "\"");
+        Tokens[Tokens.Count - 1].lex = CurrentLexeme;
+        i = j - 1;
+    }
+    continueOuter:;
+}
      else
      {
          j++;
