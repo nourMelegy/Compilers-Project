@@ -84,6 +84,7 @@ namespace JASON_Compiler
 
         }
 
+
         public void StartScanning(string SourceCode)
         {
             for (int i = 0; i < SourceCode.Length; i++)
@@ -107,7 +108,7 @@ namespace JASON_Compiler
                 }
 
                 if ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
-                    (CurrentChar >= 'a' && CurrentChar <= 'z'))
+    (CurrentChar >= 'a' && CurrentChar <= 'z'))
                 {
                     j = i + 1;
                     if (j < SourceCode.Length)
@@ -115,7 +116,8 @@ namespace JASON_Compiler
                         CurrentChar = SourceCode[j];
                         while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
                                (CurrentChar >= 'a' && CurrentChar <= 'z') ||
-                               (CurrentChar >= '0' && CurrentChar <= '9'))
+                               (CurrentChar >= '0' && CurrentChar <= '9') ||
+                               CurrentChar == '_')
                         {
                             CurrentLexeme += CurrentChar.ToString();
                             j++;
@@ -124,8 +126,57 @@ namespace JASON_Compiler
                             else break;
                         }
                     }
-                    FindTokenClass(CurrentLexeme);
-                    i = j - 1;
+
+                    // If immediately followed by any invalid character, consume it all as one invalid token
+                    if (j < SourceCode.Length &&
+                        SourceCode[j] != ' ' &&
+                        SourceCode[j] != '\r' &&
+                        SourceCode[j] != '\n' &&
+                        SourceCode[j] != ';' &&
+                        SourceCode[j] != ',' &&
+                        SourceCode[j] != '(' &&
+                        SourceCode[j] != ')' &&
+                        SourceCode[j] != '+' &&
+                        SourceCode[j] != '-' &&
+                        SourceCode[j] != '*' &&
+                        SourceCode[j] != '/' &&
+                        SourceCode[j] != ':' &&
+                        SourceCode[j] != '<' &&
+                        SourceCode[j] != '>' &&
+                        SourceCode[j] != '=' &&
+                        SourceCode[j] != '{' &&
+                        SourceCode[j] != '}')
+                    {
+                        while (j < SourceCode.Length &&
+                               SourceCode[j] != ' ' &&
+                               SourceCode[j] != '\r' &&
+                               SourceCode[j] != '\n' &&
+                               SourceCode[j] != ';' &&
+                               SourceCode[j] != ',' &&
+                               SourceCode[j] != '(' &&
+                               SourceCode[j] != ')' &&
+                               SourceCode[j] != '+' &&
+                               SourceCode[j] != '-' &&
+                               SourceCode[j] != '*' &&
+                               SourceCode[j] != '/' &&
+                               SourceCode[j] != ':' &&
+                               SourceCode[j] != '<' &&
+                               SourceCode[j] != '>' &&
+                               SourceCode[j] != '=' &&
+                               SourceCode[j] != '{' &&
+                               SourceCode[j] != '}')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        Errors.Error_List.Add("Unidentified Identifier " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                        i = j - 1;
+                    }
                 }
 
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
@@ -183,53 +234,41 @@ namespace JASON_Compiler
                     i = j + 1;
                 }
 
-else if (CurrentChar == '"')
-{
-    j = i + 1;
-    while (j < SourceCode.Length && SourceCode[j] != '"')
-    {
-        if (SourceCode[j] == '\n' || SourceCode[j] == '\r')
-        {
-            Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i, j - i));
-            i = j - 1;
-            goto continueOuter; // skips FindTokenClass entirely
-        }
-        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length &&
-           (SourceCode[j + 1] == '"' || SourceCode[j + 1] == '\\'))
-            j++;
-        j++;
-    }
+                else if (CurrentChar == '"')
+                {
+                    j = i + 1;
+                    while (j < SourceCode.Length && SourceCode[j] != '"')
+                    {
+                        if (SourceCode[j] == '\n' || SourceCode[j] == '\r')
+                        {
+                            Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i, j - i));
+                            i = j - 1;
+                            goto continueOuter;
+                        }
+                        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length &&
+                           (SourceCode[j + 1] == '"' || SourceCode[j + 1] == '\\'))
+                            j++;
+                        j++;
+                    }
 
-    if (j >= SourceCode.Length) // reached end without closing "
-    {
-        Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
-        i = SourceCode.Length - 1;
-        goto continueOuter; // ← ADD THIS, was missing before!
-    }
-    else
-    {
-        j++;
-        CurrentLexeme = SourceCode.Substring(i, j - i);
-        FindTokenClass(CurrentLexeme);
-        CurrentLexeme = CurrentLexeme.Replace("\\\\", "\\")
-                                     .Replace("\\\"", "\"");
-        Tokens[Tokens.Count - 1].lex = CurrentLexeme;
-        i = j - 1;
-    }
-    continueOuter:;
-}
-     else
-     {
-         j++;
-         CurrentLexeme = SourceCode.Substring(i, j - i);
-         FindTokenClass(CurrentLexeme);
-         CurrentLexeme = CurrentLexeme.Replace("\\\\", "\\")
-                                      .Replace("\\\"", "\"");
-         Tokens[Tokens.Count - 1].lex = CurrentLexeme;
-         i = j - 1;
-     }
- continueOuter:;
- }
+                    if (j >= SourceCode.Length)
+                    {
+                        Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
+                        i = SourceCode.Length - 1;
+                        goto continueOuter;
+                    }
+                    else
+                    {
+                        j++;
+                        CurrentLexeme = SourceCode.Substring(i, j - i);
+                        FindTokenClass(CurrentLexeme);
+                        CurrentLexeme = CurrentLexeme.Replace("\\\\", "\\")
+                                                     .Replace("\\\"", "\"");
+                        Tokens[Tokens.Count - 1].lex = CurrentLexeme;
+                        i = j - 1;
+                    }
+                }
+
                 else
                 {
                     if (CurrentChar == '_')
@@ -250,14 +289,18 @@ else if (CurrentChar == '"')
                                 else break;
                             }
                         }
-                        Errors.Error_List.Add("Invalid identifier: " + CurrentLexeme);
-                        i = j - 1;
+                        if (CurrentLexeme.Contains('"'))
+                            Errors.Error_List.Add("Invalid string: " + CurrentLexeme);
+                        else
+                            Errors.Error_List.Add("Unidentified Identifier " + CurrentLexeme);
                     }
                     else
                     {
                         FindTokenClass(CurrentLexeme);
                     }
                 }
+
+            continueOuter:;
             }
 
             JASON_Compiler.TokenStream = Tokens;
@@ -319,9 +362,10 @@ else if (CurrentChar == '"')
         bool isIdentifier(string lex)
         {
             bool isValid = true;
-            Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]$|^[A-Za-z]$", RegexOptions.Compiled);
+            Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9_]*$", RegexOptions.Compiled);
             isValid = regex.IsMatch(lex);
             return isValid;
+ 
         }
         bool isConstant(string lex)
         {
