@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 public enum Token_Class
-
-{// Keywords
+{
+    // Keywords
     Int, Float, String,
     Read, Write,
     Repeat, Until,
@@ -27,14 +27,12 @@ public enum Token_Class
     Number,
     StringValue,
     Constant,
-    StringLiteral
-        , Dot
-
+    StringLiteral,
+    Dot
 }
+
 namespace JASON_Compiler
 {
-
-
     public class Token
     {
         public string lex;
@@ -81,9 +79,7 @@ namespace JASON_Compiler
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
             Operators.Add(".", Token_Class.Dot);
-
         }
-
 
         public void StartScanning(string SourceCode)
         {
@@ -107,8 +103,9 @@ namespace JASON_Compiler
                     }
                 }
 
+        
                 if ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
-    (CurrentChar >= 'a' && CurrentChar <= 'z'))
+                    (CurrentChar >= 'a' && CurrentChar <= 'z'))
                 {
                     j = i + 1;
                     if (j < SourceCode.Length)
@@ -127,49 +124,41 @@ namespace JASON_Compiler
                         }
                     }
 
-                    // If immediately followed by any invalid character, consume it all as one invalid token
+                    // If next char is invalid (not a delimiter/operator), consume and report error
                     if (j < SourceCode.Length &&
-                        SourceCode[j] != ' ' &&
-                        SourceCode[j] != '\r' &&
-                        SourceCode[j] != '\n' &&
-                        SourceCode[j] != ';' &&
-                        SourceCode[j] != ',' &&
-                        SourceCode[j] != '(' &&
-                        SourceCode[j] != ')' &&
-                        SourceCode[j] != '+' &&
-                        SourceCode[j] != '-' &&
-                        SourceCode[j] != '*' &&
-                        SourceCode[j] != '/' &&
-                        SourceCode[j] != ':' &&
-                        SourceCode[j] != '<' &&
-                        SourceCode[j] != '>' &&
-                        SourceCode[j] != '=' &&
-                        SourceCode[j] != '{' &&
-                        SourceCode[j] != '}')
+                        SourceCode[j] != ' '  && SourceCode[j] != '\r' && SourceCode[j] != '\n' &&
+                        SourceCode[j] != ';'  && SourceCode[j] != ','  &&
+                        SourceCode[j] != '('  && SourceCode[j] != ')'  &&
+                        SourceCode[j] != '+'  && SourceCode[j] != '-'  &&
+                        SourceCode[j] != '*'  && SourceCode[j] != '/'  &&
+                        SourceCode[j] != ':'  && SourceCode[j] != '<'  &&
+                        SourceCode[j] != '>'  && SourceCode[j] != '='  &&
+                        SourceCode[j] != '{'  && SourceCode[j] != '}'  &&
+                        SourceCode[j] != '"')
                     {
                         while (j < SourceCode.Length &&
-                               SourceCode[j] != ' ' &&
-                               SourceCode[j] != '\r' &&
-                               SourceCode[j] != '\n' &&
-                               SourceCode[j] != ';' &&
-                               SourceCode[j] != ',' &&
-                               SourceCode[j] != '(' &&
-                               SourceCode[j] != ')' &&
-                               SourceCode[j] != '+' &&
-                               SourceCode[j] != '-' &&
-                               SourceCode[j] != '*' &&
-                               SourceCode[j] != '/' &&
-                               SourceCode[j] != ':' &&
-                               SourceCode[j] != '<' &&
-                               SourceCode[j] != '>' &&
-                               SourceCode[j] != '=' &&
-                               SourceCode[j] != '{' &&
-                               SourceCode[j] != '}')
+                               SourceCode[j] != ' '  && SourceCode[j] != '\r' && SourceCode[j] != '\n' &&
+                               SourceCode[j] != ';'  && SourceCode[j] != ','  &&
+                               SourceCode[j] != '('  && SourceCode[j] != ')'  &&
+                               SourceCode[j] != '+'  && SourceCode[j] != '-'  &&
+                               SourceCode[j] != '*'  && SourceCode[j] != '/'  &&
+                               SourceCode[j] != ':'  && SourceCode[j] != '<'  &&
+                               SourceCode[j] != '>'  && SourceCode[j] != '='  &&
+                               SourceCode[j] != '{'  && SourceCode[j] != '}'  &&
+                               SourceCode[j] != '"')
                         {
                             CurrentLexeme += SourceCode[j];
                             j++;
                         }
-                        Errors.Error_List.Add("Unidentified Identifier " + CurrentLexeme);
+                        Errors.Error_List.Add("Unidentified Token " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    // If next char is ", report as invalid string
+                    else if (j < SourceCode.Length && SourceCode[j] == '"')
+                    {
+                        CurrentLexeme += SourceCode[j];
+                        j++;
+                        Errors.Error_List.Add("Invalid string: " + CurrentLexeme);
                         i = j - 1;
                     }
                     else
@@ -179,6 +168,7 @@ namespace JASON_Compiler
                     }
                 }
 
+      
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
                     j = i + 1;
@@ -223,6 +213,7 @@ namespace JASON_Compiler
                     }
                 }
 
+ 
                 else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
                 {
                     j = i + 2;
@@ -269,6 +260,7 @@ namespace JASON_Compiler
                     }
                 }
 
+
                 else
                 {
                     if (CurrentChar == '_')
@@ -289,10 +281,8 @@ namespace JASON_Compiler
                                 else break;
                             }
                         }
-                        if (CurrentLexeme.Contains('"'))
-                            Errors.Error_List.Add("Invalid string: " + CurrentLexeme);
-                        else
-                            Errors.Error_List.Add("Unidentified Identifier " + CurrentLexeme);
+                        Errors.Error_List.Add("Invalid identifier: " + CurrentLexeme);
+                        i = j - 1;
                     }
                     else
                     {
@@ -305,84 +295,65 @@ namespace JASON_Compiler
 
             JASON_Compiler.TokenStream = Tokens;
         }
+
         void FindTokenClass(string Lex)
         {
             Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
-            //Is it a reserved word?
+
             if (ReservedWords.ContainsKey(Lex))
             {
                 TC = ReservedWords[Lex];
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-
-            //Is it an identifier?
             else if (isIdentifier(Lex))
             {
                 TC = Token_Class.Idenifier;
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-
             else if (Operators.ContainsKey(Lex))
             {
                 TC = Operators[Lex];
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-
-            //Is it a Constant?
             else if (isConstant(Lex))
             {
                 TC = Token_Class.Constant;
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-            //Is it a String Literal?
             else if (isStringLiteral(Lex))
             {
                 TC = Token_Class.StringLiteral;
                 Tok.token_type = TC;
                 Tokens.Add(Tok);
             }
-            //Is it an operator?
-
             else
             {
                 Errors.Error_List.Add("Unidentified Token " + Lex);
             }
-
-
         }
-
-
 
         bool isIdentifier(string lex)
         {
-            bool isValid = true;
             Regex regex = new Regex(@"^[A-Za-z][A-Za-z0-9_]*$", RegexOptions.Compiled);
-            isValid = regex.IsMatch(lex);
-            return isValid;
- 
+            return regex.IsMatch(lex);
         }
+
         bool isConstant(string lex)
         {
-            bool isValid = true;
             Regex regex = new Regex(@"^[0-9]+(\.[0-9]+)?$", RegexOptions.Compiled);
-            isValid = regex.IsMatch(lex);
-            return isValid;
+            return regex.IsMatch(lex);
         }
+
         bool isStringLiteral(string lex)
         {
-            bool isValid = true;
             Regex regex = new Regex(@"^""([^""\\]|\\.)*""$", RegexOptions.Compiled);
-            isValid = regex.IsMatch(lex);
-            return isValid;
+            return regex.IsMatch(lex);
         }
     }
 }
-// ttt
-//f
-//.
