@@ -77,6 +77,7 @@ namespace JASON_Compiler
             Operators.Add("}", Token_Class.RCurly);
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
+      
         }
 
         public void StartScanning(string SourceCode)
@@ -216,6 +217,22 @@ namespace JASON_Compiler
                                 CurrentChar = SourceCode[j];
                             else break;
                         }
+                    }
+                    if (j < SourceCode.Length && ((SourceCode[j] >= 'A' && SourceCode[j] <= 'Z') ||(SourceCode[j] >= 'a' && SourceCode[j] <= 'z') ||
+                         SourceCode[j] == '_'))
+                    {
+                        while (j < SourceCode.Length &&
+                              ((SourceCode[j] >= 'A' && SourceCode[j] <= 'Z') ||
+                               (SourceCode[j] >= 'a' && SourceCode[j] <= 'z') ||
+                               (SourceCode[j] >= '0' && SourceCode[j] <= '9') ||
+                               SourceCode[j] == '_'))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+
+                        Errors.Error_List.Add("Invalid identifier: " + CurrentLexeme);
+                        i = j - 1;
                     }
 
                     if (j < SourceCode.Length && SourceCode[j] == '.')
