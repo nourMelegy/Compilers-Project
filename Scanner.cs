@@ -27,8 +27,7 @@ public enum Token_Class
     Number,
     StringValue,
     Constant,
-    StringLiteral,
-    Dot
+    StringLiteral
 }
 
 namespace JASON_Compiler
@@ -78,261 +77,260 @@ namespace JASON_Compiler
             Operators.Add("}", Token_Class.RCurly);
             Operators.Add(";", Token_Class.Semicolon);
             Operators.Add(",", Token_Class.Comma);
-            Operators.Add(".", Token_Class.Dot);
         }
 
-public void StartScanning(string SourceCode)
-{
-    for (int i = 0; i < SourceCode.Length; i++)
-    {
-        int j = i;
-        char CurrentChar = SourceCode[i];
-        string CurrentLexeme = CurrentChar.ToString();
-
-        if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
-            continue;
-
-        if (i + 1 < SourceCode.Length)
+        public void StartScanning(string SourceCode)
         {
-            string twoChar = "" + SourceCode[i] + SourceCode[i + 1];
-            if (Operators.ContainsKey(twoChar))
+            for (int i = 0; i < SourceCode.Length; i++)
             {
-                FindTokenClass(twoChar);
-                i++;
-                continue;
-            }
-        }
+                int j = i;
+                char CurrentChar = SourceCode[i];
+                string CurrentLexeme = CurrentChar.ToString();
 
-        if ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
-            (CurrentChar >= 'a' && CurrentChar <= 'z'))
-        {
-            j = i + 1;
-            if (j < SourceCode.Length)
-            {
-                CurrentChar = SourceCode[j];
-                while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
-                       (CurrentChar >= 'a' && CurrentChar <= 'z') ||
-                       (CurrentChar >= '0' && CurrentChar <= '9') ||
-                       CurrentChar == '_')
-                {
-                    CurrentLexeme += CurrentChar.ToString();
-                    j++;
-                    if (j < SourceCode.Length)
-                        CurrentChar = SourceCode[j];
-                    else break;
-                }
-            }
+                if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
+                    continue;
 
-            // Case 1: immediately followed by "
-            if (j < SourceCode.Length && SourceCode[j] == '"')
-            {
-                CurrentLexeme += SourceCode[j];
-                j++;
-                // consume everything until closing " or end of line
-                while (j < SourceCode.Length &&
-                       SourceCode[j] != '"' &&
-                       SourceCode[j] != '\n' &&
-                       SourceCode[j] != '\r')
+                if (i + 1 < SourceCode.Length)
                 {
-                    CurrentLexeme += SourceCode[j];
-                    j++;
-                }
-                // consume closing " if found
-                if (j < SourceCode.Length && SourceCode[j] == '"')
-                {
-                    CurrentLexeme += SourceCode[j];
-                    j++;
-                }
-                Errors.Error_List.Add("Invalid string: " + CurrentLexeme);
-                i = j - 1;
-            }
-            // Case 2: immediately followed by other invalid character
-            else if (j < SourceCode.Length &&
-                SourceCode[j] != ' ' &&
-                SourceCode[j] != '\r' &&
-                SourceCode[j] != '\n' &&
-                SourceCode[j] != ';' &&
-                SourceCode[j] != ',' &&
-                SourceCode[j] != '(' &&
-                SourceCode[j] != ')' &&
-                SourceCode[j] != '+' &&
-                SourceCode[j] != '-' &&
-                SourceCode[j] != '*' &&
-                SourceCode[j] != '/' &&
-                SourceCode[j] != ':' &&
-                SourceCode[j] != '<' &&
-                SourceCode[j] != '>' &&
-                SourceCode[j] != '=' &&
-                SourceCode[j] != '{' &&
-                SourceCode[j] != '}')
-            {
-                while (j < SourceCode.Length &&
-                       SourceCode[j] != ' ' &&
-                       SourceCode[j] != '\r' &&
-                       SourceCode[j] != '\n' &&
-                       SourceCode[j] != ';' &&
-                       SourceCode[j] != ',' &&
-                       SourceCode[j] != '(' &&
-                       SourceCode[j] != ')' &&
-                       SourceCode[j] != '+' &&
-                       SourceCode[j] != '-' &&
-                       SourceCode[j] != '*' &&
-                       SourceCode[j] != '/' &&
-                       SourceCode[j] != ':' &&
-                       SourceCode[j] != '<' &&
-                       SourceCode[j] != '>' &&
-                       SourceCode[j] != '=' &&
-                       SourceCode[j] != '{' &&
-                       SourceCode[j] != '}')
-                {
-                    CurrentLexeme += SourceCode[j];
-                    j++;
-                }
-                Errors.Error_List.Add("Unidentified Token " + CurrentLexeme);
-                i = j - 1;
-            }
-            // Case 3: valid
-            else
-            {
-                FindTokenClass(CurrentLexeme);
-                i = j - 1;
-            }
-        }
-
-        else if (CurrentChar >= '0' && CurrentChar <= '9')
-        {
-            j = i + 1;
-            bool hasDot = false;
-
-            if (j < SourceCode.Length)
-            {
-                CurrentChar = SourceCode[j];
-                while (j < SourceCode.Length &&
-                      ((CurrentChar >= '0' && CurrentChar <= '9') ||
-                       (CurrentChar == '.' && !hasDot)))
-                {
-                    if (CurrentChar == '.') hasDot = true;
-                    CurrentLexeme += CurrentChar;
-                    j++;
-                    if (j < SourceCode.Length)
-                        CurrentChar = SourceCode[j];
-                    else break;
-                }
-            }
-
-            if (j < SourceCode.Length && SourceCode[j] == '.')
-            {
-                while (j < SourceCode.Length &&
-                      (SourceCode[j] == '.' || (SourceCode[j] >= '0' && SourceCode[j] <= '9')))
-                {
-                    CurrentLexeme += SourceCode[j];
-                    j++;
-                }
-                Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
-                i = j - 1;
-            }
-            else if (hasDot && CurrentLexeme.EndsWith("."))
-            {
-                Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
-                i = j - 1;
-            }
-            else
-            {
-                FindTokenClass(CurrentLexeme);
-                i = j - 1;
-            }
-        }
-
-        else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
-        {
-            j = i + 2;
-            while (j < SourceCode.Length - 1 &&
-                  !(SourceCode[j] == '*' && SourceCode[j + 1] == '/'))
-            {
-                j++;
-            }
-            i = j + 1;
-        }
-
-        else if (CurrentChar == '"')
-        {
-            j = i + 1;
-            while (j < SourceCode.Length && SourceCode[j] != '"')
-            {
-                if (SourceCode[j] == '\n' || SourceCode[j] == '\r')
-                {
-                    // build error from current line content
-                    string errorLexeme = SourceCode.Substring(i, j - i);
-                    // skip newline and consume next line too
-                    j++;
-                    while (j < SourceCode.Length &&
-                           SourceCode[j] != '\n' && SourceCode[j] != '\r')
+                    string twoChar = "" + SourceCode[i] + SourceCode[i + 1];
+                    if (Operators.ContainsKey(twoChar))
                     {
-                        errorLexeme += SourceCode[j];
+                        FindTokenClass(twoChar);
+                        i++;
+                        continue;
+                    }
+                }
+
+                if ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                    (CurrentChar >= 'a' && CurrentChar <= 'z'))
+                {
+                    j = i + 1;
+                    if (j < SourceCode.Length)
+                    {
+                        CurrentChar = SourceCode[j];
+                        while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                               (CurrentChar >= 'a' && CurrentChar <= 'z') ||
+                               (CurrentChar >= '0' && CurrentChar <= '9') ||
+                               CurrentChar == '_')
+                        {
+                            CurrentLexeme += CurrentChar.ToString();
+                            j++;
+                            if (j < SourceCode.Length)
+                                CurrentChar = SourceCode[j];
+                            else break;
+                        }
+                    }
+
+                    // Case 1: immediately followed by "
+                    if (j < SourceCode.Length && SourceCode[j] == '"')
+                    {
+                        CurrentLexeme += SourceCode[j];
+                        j++;
+                        // consume everything until closing " or end of line
+                        while (j < SourceCode.Length &&
+                               SourceCode[j] != '"' &&
+                               SourceCode[j] != '\n' &&
+                               SourceCode[j] != '\r')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        // consume closing " if found
+                        if (j < SourceCode.Length && SourceCode[j] == '"')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        Errors.Error_List.Add("Invalid string: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    // Case 2: immediately followed by other invalid character
+                    else if (j < SourceCode.Length &&
+                        SourceCode[j] != ' ' &&
+                        SourceCode[j] != '\r' &&
+                        SourceCode[j] != '\n' &&
+                        SourceCode[j] != ';' &&
+                        SourceCode[j] != ',' &&
+                        SourceCode[j] != '(' &&
+                        SourceCode[j] != ')' &&
+                        SourceCode[j] != '+' &&
+                        SourceCode[j] != '-' &&
+                        SourceCode[j] != '*' &&
+                        SourceCode[j] != '/' &&
+                        SourceCode[j] != ':' &&
+                        SourceCode[j] != '<' &&
+                        SourceCode[j] != '>' &&
+                        SourceCode[j] != '=' &&
+                        SourceCode[j] != '{' &&
+                        SourceCode[j] != '}')
+                    {
+                        while (j < SourceCode.Length &&
+                               SourceCode[j] != ' ' &&
+                               SourceCode[j] != '\r' &&
+                               SourceCode[j] != '\n' &&
+                               SourceCode[j] != ';' &&
+                               SourceCode[j] != ',' &&
+                               SourceCode[j] != '(' &&
+                               SourceCode[j] != ')' &&
+                               SourceCode[j] != '+' &&
+                               SourceCode[j] != '-' &&
+                               SourceCode[j] != '*' &&
+                               SourceCode[j] != '/' &&
+                               SourceCode[j] != ':' &&
+                               SourceCode[j] != '<' &&
+                               SourceCode[j] != '>' &&
+                               SourceCode[j] != '=' &&
+                               SourceCode[j] != '{' &&
+                               SourceCode[j] != '}')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        Errors.Error_List.Add("Unidentified Token " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    // Case 3: valid
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                        i = j - 1;
+                    }
+                }
+
+                else if (CurrentChar >= '0' && CurrentChar <= '9')
+                {
+                    j = i + 1;
+                    bool hasDot = false;
+
+                    if (j < SourceCode.Length)
+                    {
+                        CurrentChar = SourceCode[j];
+                        while (j < SourceCode.Length &&
+                              ((CurrentChar >= '0' && CurrentChar <= '9') ||
+                               (CurrentChar == '.' && !hasDot)))
+                        {
+                            if (CurrentChar == '.') hasDot = true;
+                            CurrentLexeme += CurrentChar;
+                            j++;
+                            if (j < SourceCode.Length)
+                                CurrentChar = SourceCode[j];
+                            else break;
+                        }
+                    }
+
+                    if (j < SourceCode.Length && SourceCode[j] == '.')
+                    {
+                        while (j < SourceCode.Length &&
+                              (SourceCode[j] == '.' || (SourceCode[j] >= '0' && SourceCode[j] <= '9')))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else if (hasDot && CurrentLexeme.EndsWith("."))
+                    {
+                        Errors.Error_List.Add("Invalid number: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                        i = j - 1;
+                    }
+                }
+
+                else if (CurrentChar == '/' && i + 1 < SourceCode.Length && SourceCode[i + 1] == '*')
+                {
+                    j = i + 2;
+                    while (j < SourceCode.Length - 1 &&
+                          !(SourceCode[j] == '*' && SourceCode[j + 1] == '/'))
+                    {
                         j++;
                     }
-                    Errors.Error_List.Add("Unterminated string: " + errorLexeme);
-                    i = j - 1;
-                    goto continueOuter;
+                    i = j + 1;
                 }
-                if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length &&
-                   (SourceCode[j + 1] == '"' || SourceCode[j + 1] == '\\'))
-                    j++;
-                j++;
-            }
 
-            if (j >= SourceCode.Length)
-            {
-                Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
-                i = SourceCode.Length - 1;
-                goto continueOuter;
-            }
-            else
-            {
-                j++;
-                CurrentLexeme = SourceCode.Substring(i, j - i);
-                FindTokenClass(CurrentLexeme);
-                CurrentLexeme = CurrentLexeme.Replace("\\\\", "\\")
-                                             .Replace("\\\"", "\"");
-                Tokens[Tokens.Count - 1].lex = CurrentLexeme;
-                i = j - 1;
-            }
-        }
-
-        else
-        {
-            if (CurrentChar == '_')
-            {
-                j = i + 1;
-                if (j < SourceCode.Length)
+                else if (CurrentChar == '"')
                 {
-                    CurrentChar = SourceCode[j];
-                    while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
-                           (CurrentChar >= 'a' && CurrentChar <= 'z') ||
-                           (CurrentChar >= '0' && CurrentChar <= '9') ||
-                           CurrentChar == '_')
+                    j = i + 1;
+                    while (j < SourceCode.Length && SourceCode[j] != '"')
                     {
-                        CurrentLexeme += CurrentChar.ToString();
+                        if (SourceCode[j] == '\n' || SourceCode[j] == '\r')
+                        {
+                            // build error from current line content
+                            string errorLexeme = SourceCode.Substring(i, j - i);
+                            // skip newline and consume next line too
+                            j++;
+                            while (j < SourceCode.Length &&
+                                   SourceCode[j] != '\n' && SourceCode[j] != '\r')
+                            {
+                                errorLexeme += SourceCode[j];
+                                j++;
+                            }
+                            Errors.Error_List.Add("Unterminated string: " + errorLexeme);
+                            i = j - 1;
+                            goto continueOuter;
+                        }
+                        if (SourceCode[j] == '\\' && j + 1 < SourceCode.Length &&
+                           (SourceCode[j + 1] == '"' || SourceCode[j + 1] == '\\'))
+                            j++;
                         j++;
+                    }
+
+                    if (j >= SourceCode.Length)
+                    {
+                        Errors.Error_List.Add("Unterminated string: " + SourceCode.Substring(i));
+                        i = SourceCode.Length - 1;
+                        goto continueOuter;
+                    }
+                    else
+                    {
+                        j++;
+                        CurrentLexeme = SourceCode.Substring(i, j - i);
+                        FindTokenClass(CurrentLexeme);
+                        CurrentLexeme = CurrentLexeme.Replace("\\\\", "\\")
+                                                     .Replace("\\\"", "\"");
+                        Tokens[Tokens.Count - 1].lex = CurrentLexeme;
+                        i = j - 1;
+                    }
+                }
+
+                else
+                {
+                    if (CurrentChar == '_')
+                    {
+                        j = i + 1;
                         if (j < SourceCode.Length)
+                        {
                             CurrentChar = SourceCode[j];
-                        else break;
+                            while ((CurrentChar >= 'A' && CurrentChar <= 'Z') ||
+                                   (CurrentChar >= 'a' && CurrentChar <= 'z') ||
+                                   (CurrentChar >= '0' && CurrentChar <= '9') ||
+                                   CurrentChar == '_')
+                            {
+                                CurrentLexeme += CurrentChar.ToString();
+                                j++;
+                                if (j < SourceCode.Length)
+                                    CurrentChar = SourceCode[j];
+                                else break;
+                            }
+                        }
+                        Errors.Error_List.Add("Invalid identifier: " + CurrentLexeme);
+                        i = j - 1;
+                    }
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
                     }
                 }
-                Errors.Error_List.Add("Invalid identifier: " + CurrentLexeme);
-                i = j - 1;
+
+            continueOuter:;
             }
-            else
-            {
-                FindTokenClass(CurrentLexeme);
-            }
+
+            JASON_Compiler.TokenStream = Tokens;
         }
-
-    continueOuter:;
-    }
-
-    JASON_Compiler.TokenStream = Tokens;
-}
 
         void FindTokenClass(string Lex)
         {
