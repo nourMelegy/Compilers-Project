@@ -63,7 +63,102 @@ namespace JASON_Compiler
         }
 
         // Implement your logic here
-
+        Node Condition_Statement()
+        {
+            Node condition_statement = new Node("Condition_Statement");
+            condition_statement.Children.Add(Condition());
+            condition_statement.Children.Add(Condition_Ext());
+            return condition_statement;
+        }
+        Node Condition_Ext()
+        {
+            Node condition_Ext = new Node("Condition_Ext");
+            if (InputPointer < TokenStream.Count &&
+       (TokenStream[InputPointer].token_type == Token_Class.And ||
+        TokenStream[InputPointer].token_type == Token_Class.Or)) { 
+            condition_Ext.Children.Add(Boolean_Operator());
+            condition_Ext.Children.Add(Condition());
+            condition_Ext.Children.Add(Condition_Ext());
+        }
+            return condition_Ext;
+        }
+        Node Condition()
+            {
+                Node condition = new Node("Condition");
+                condition.Children.Add(match(Token_Class.Idenifier));
+                condition.Children.Add(Condition_Operator());
+                condition.Children.Add(Term());
+            return condition;
+        }
+        Node Condition_Operator()
+        {
+            Node condition_operator = new Node("Condition_Operator");
+            if (InputPointer < TokenStream.Count &&
+                (TokenStream[InputPointer].token_type == Token_Class.Equal ||
+                 TokenStream[InputPointer].token_type == Token_Class.NotEqual ||
+                 TokenStream[InputPointer].token_type == Token_Class.LessT ||
+                 TokenStream[InputPointer].token_type == Token_Class.GreaterT ))
+            {
+                condition_operator.Children.Add(match(TokenStream[InputPointer].token_type));
+            }
+            else
+            {
+                Errors.Error_List.Add("Parsing Error: Expected Condition Operator and " +
+                    TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+                InputPointer++;
+            }
+            return condition_operator;
+        }
+        Node Boolean_Operator()
+        {
+            Node boolean_operator = new Node("Boolean_Operator");
+            if (InputPointer < TokenStream.Count &&
+                (TokenStream[InputPointer].token_type == Token_Class.And ||
+                 TokenStream[InputPointer].token_type == Token_Class.Or))
+            {
+                boolean_operator.Children.Add(match(TokenStream[InputPointer].token_type));
+            }
+            else
+            {
+                Errors.Error_List.Add("Parsing Error: Expected Boolean Operator and " +
+                    TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+                InputPointer++;
+            }
+            return boolean_operator;
+        }
+        Node Function_Call()
+        {
+            Node function_call = new Node("Function_Call");
+            function_call.Children.Add(match(Token_Class.Idenifier));
+            function_call.Children.Add(match(Token_Class.LParanthesis));
+            if (InputPointer < TokenStream.Count &&
+                TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+            {
+                function_call.Children.Add(Arguments());
+            } 
+            function_call.Children.Add(match(Token_Class.RParanthesis));
+            function_call.Children.Add(match(Token_Class.Semicolon));
+            return function_call;
+        }
+        Node Arguments()
+        {
+            Node arguments = new Node("Arguments");
+            arguments.Children.Add(match(Token_Class.Idenifier));
+            arguments.Children.Add(Arguments_Tail());
+            return arguments;
+        }  
+        Node Arguments_Tail()
+        {
+            Node arguments_tail = new Node("Arguments_Tail");
+            if (InputPointer < TokenStream.Count &&
+                TokenStream[InputPointer].token_type == Token_Class.Comma)
+            {
+                arguments_tail.Children.Add(match(Token_Class.Comma));
+                arguments_tail.Children.Add(match(Token_Class.Idenifier));
+                arguments_tail.Children.Add(Arguments_Tail());
+            }
+            return arguments_tail;
+        }
         public Node match(Token_Class ExpectedToken)
         {
 
