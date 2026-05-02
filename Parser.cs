@@ -85,7 +85,7 @@ namespace JASON_Compiler
         Node Condition()
             {
                 Node condition = new Node("Condition");
-                condition.Children.Add(match(Token_Class.Idenifier));
+                condition.Children.Add(match(Token_Class.Identifier));
                 condition.Children.Add(Condition_Operator());
                 condition.Children.Add(Term());
             return condition;
@@ -144,10 +144,10 @@ namespace JASON_Compiler
         Node Function_Call()
         {
             Node function_call = new Node("Function_Call");
-            function_call.Children.Add(match(Token_Class.Idenifier));
+            function_call.Children.Add(match(Token_Class.Identifier));
             function_call.Children.Add(match(Token_Class.LParanthesis));
             if (InputPointer < TokenStream.Count &&
-                TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+                TokenStream[InputPointer].token_type == Token_Class.Identifier)
             {
                 function_call.Children.Add(Arguments());
             } 
@@ -158,7 +158,7 @@ namespace JASON_Compiler
         Node Arguments()
         {
             Node arguments = new Node("Arguments");
-            arguments.Children.Add(match(Token_Class.Idenifier));
+            arguments.Children.Add(match(Token_Class.Identifier));
             arguments.Children.Add(Arguments_Tail());
             return arguments;
         }  
@@ -169,7 +169,7 @@ namespace JASON_Compiler
                 TokenStream[InputPointer].token_type == Token_Class.Comma)
             {
                 arguments_tail.Children.Add(match(Token_Class.Comma));
-                arguments_tail.Children.Add(match(Token_Class.Idenifier));
+                arguments_tail.Children.Add(match(Token_Class.Identifier));
                 arguments_tail.Children.Add(Arguments_Tail());
             }
             return arguments_tail;
