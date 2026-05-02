@@ -23,7 +23,7 @@ public enum Token_Class
     LCurly, RCurly,
     Semicolon, Comma,
     // Literals
-    Idenifier,
+    Identifier,
     Number,
     StringValue,
     Constant,
