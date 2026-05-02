@@ -93,36 +93,51 @@ namespace JASON_Compiler
         Node Condition_Operator()
         {
             Node condition_operator = new Node("Condition_Operator");
-            if (InputPointer < TokenStream.Count &&
-                (TokenStream[InputPointer].token_type == Token_Class.Equal ||
-                 TokenStream[InputPointer].token_type == Token_Class.NotEqual ||
-                 TokenStream[InputPointer].token_type == Token_Class.LessT ||
-                 TokenStream[InputPointer].token_type == Token_Class.GreaterT ))
+            if (InputPointer < TokenStream.Count)
             {
-                condition_operator.Children.Add(match(TokenStream[InputPointer].token_type));
+                Token_Class currentTokenType = TokenStream[InputPointer].token_type;
+
+                if (currentTokenType == Token_Class.Equal)
+                    condition_operator.Children.Add(match(Token_Class.Equal));
+                else if (currentTokenType == Token_Class.NotEqual)
+                    condition_operator.Children.Add(match(Token_Class.NotEqual));
+                else if (currentTokenType == Token_Class.GreaterT)
+                    condition_operator.Children.Add(match(Token_Class.GreaterT));
+                else if (currentTokenType == Token_Class.LessT)
+                    condition_operator.Children.Add(match(Token_Class.LessT));
+                else
+                {
+                    Errors.Error_List.Add("Parsing Error: Expected Condition Operator and " +
+                        TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+                    InputPointer++;
+                }
             }
             else
             {
-                Errors.Error_List.Add("Parsing Error: Expected Condition Operator and " +
-                    TokenStream[InputPointer].token_type.ToString() + " found\r\n");
-                InputPointer++;
+                Errors.Error_List.Add("Parsing Error: Unexpected end of input, Expected Condition Operator\r\n");
             }
             return condition_operator;
         }
         Node Boolean_Operator()
         {
             Node boolean_operator = new Node("Boolean_Operator");
-            if (InputPointer < TokenStream.Count &&
-                (TokenStream[InputPointer].token_type == Token_Class.And ||
-                 TokenStream[InputPointer].token_type == Token_Class.Or))
-            {
-                boolean_operator.Children.Add(match(TokenStream[InputPointer].token_type));
-            }
+            if (InputPointer < TokenStream.Count) { 
+                Token_Class currentTokenType = TokenStream[InputPointer].token_type;
+
+              if (currentTokenType == Token_Class.And)
+                    boolean_operator.Children.Add(match(Token_Class.And));
+              else if (currentTokenType == Token_Class.Or)
+                    boolean_operator.Children.Add(match(Token_Class.Or));
+              else
+                {
+                    Errors.Error_List.Add("Parsing Error: Expected Boolean Operator and " +
+                        TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+                    InputPointer++;
+                }
+                }
             else
             {
-                Errors.Error_List.Add("Parsing Error: Expected Boolean Operator and " +
-                    TokenStream[InputPointer].token_type.ToString() + " found\r\n");
-                InputPointer++;
+                Errors.Error_List.Add("Parsing Error: Unexpected end of input, Expected Boolean Operator\r\n");
             }
             return boolean_operator;
         }
